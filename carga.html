@@ -1,0 +1,42 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Carga de productos – Control de vencimientos</title>
+  <link rel="stylesheet" href="static/css/styles.css" />
+</head>
+<body class="body-bg">
+  <div class="app-shell">
+    <header class="app-header">
+      <div>
+        <h1>Carga de productos</h1>
+        <p>Sube un archivo CSV con los productos para que el scanner pueda consultarlos.</p>
+      </div>
+      <a href="index.html" class="pill-link">Ir al scanner</a>
+    </header>
+
+    <main class="app-main">
+      <section class="card-section">
+        <h2><span class="step">1</span> Seleccionar archivo CSV</h2>
+        <p class="muted small">
+          Formato requerido (encabezados): <code>code,name,lot,made_date,expiry_date</code> con fechas en
+          formato <strong>YYYY-MM-DD</strong>.
+        </p>
+
+        <div class="upload-row">
+          <input type="file" id="csvFile" accept=".csv,text/csv" />
+          <button id="btnLoadCsv">Cargar productos</button>
+        </div>
+
+        <p id="csvStatus" class="status-info">
+          Ningún archivo cargado todavía.
+        </p>
+      </section>
+    </main>
+  </div>
+
+  <script src="static/js/carga.js"></script>
+</body>
+</html>
