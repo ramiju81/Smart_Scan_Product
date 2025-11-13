@@ -5,16 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Control de Vencimientos – Scanner</title>
   <link rel="stylesheet" href="static/css/styles.css" />
+  <!-- Librería ZXing para leer códigos de barras y QR -->
   <script src="https://unpkg.com/@zxing/browser@latest"></script>
 </head>
 <body class="body-bg">
   <div class="page-shell">
+    <!-- Barra superior -->
     <header class="top-bar">
       <div class="brand-block">
         <div class="brand-mark">CV</div>
         <div class="brand-text">
           <h1>Control de Vencimientos</h1>
-          <p>Lectura inteligente por código de barras y QR.</p>
+          <p>Lectura por código de barras y QR.</p>
         </div>
       </div>
       <nav class="top-actions">
@@ -22,14 +24,15 @@
       </nav>
     </header>
 
-    <main class="main-layout">
-      <!-- Panel de scanner -->
+    <!-- Contenido principal: SOLO scanner + una línea visual de features -->
+    <main class="main-layout" style="grid-template-columns: minmax(0,1fr);">
       <section class="scanner-panel">
         <h2 class="section-title">
           <span class="step">1</span> Escanear / ingresar código
         </h2>
 
         <div class="scan-card">
+          <!-- input + botón -->
           <div class="scan-input-row">
             <input
               id="code-input"
@@ -40,44 +43,29 @@
             <button id="btn-search" class="btn-primary">Buscar</button>
           </div>
 
+          <!-- botón única cámara -->
           <div class="scan-controls-row">
-            <div class="scan-controls-left">
-              <button id="btn-toggle-camera" class="btn-secondary">
-                Usar cámara
-              </button>
-              <select id="camera-select" class="camera-select"></select>
-            </div>
+            <button id="btn-toggle-camera" class="btn-secondary">
+              Usar cámara
+            </button>
             <span class="hint">
               Códigos de barras · QR · Pistola lectora
             </span>
           </div>
 
+          <!-- video -->
           <div class="video-wrapper" id="video-wrapper" hidden>
             <video id="preview" playsinline></video>
           </div>
         </div>
+
+        <!-- Fila visual corta de características (sin párrafos largos) -->
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;">
+          <div class="pill-link">Escaneo en tiempo real</div>
+          <div class="pill-link">Alertas cada 10 min</div>
+          <div class="pill-link">Ficha emergente del producto</div>
+        </div>
       </section>
-
-      <!-- Panel visual / resumen -->
-      <aside class="info-panel">
-        <div class="info-card">
-          <h3>Lectura en tiempo real</h3>
-          <ul>
-            <li>Escaneo desde cámara o lector.</li>
-            <li>Identificación inmediata del producto.</li>
-            <li>Popup con ficha detallada.</li>
-          </ul>
-        </div>
-
-        <div class="info-card secondary">
-          <h3>Alertas inteligentes</h3>
-          <ul>
-            <li>Revisión automática cada 10 minutos.</li>
-            <li>Notificaciones por producto vencido o por vencer.</li>
-            <li>Funciona con la página en segundo plano.</li>
-          </ul>
-        </div>
-      </aside>
     </main>
 
     <footer class="page-footer">
