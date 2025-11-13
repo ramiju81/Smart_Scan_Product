@@ -1,6 +1,6 @@
 // static/js/scanner.js
 // Scanner + cámara + notificaciones + popup de producto
-// TODO se muestra en notificaciones y modal, NADA incrustado en el HTML.
+// Sin "Esta página dice", sin info incrustada en HTML.
 
 const STORAGE_KEY = "productos_vencimientos";
 
@@ -64,6 +64,31 @@ function cargarBD() {
 cargarBD();
 
 // =====================
+// Toasts (mensajes discretos)
+// =====================
+function getToastContainer() {
+  let c = document.getElementById("toast-container");
+  if (!c) {
+    c = document.createElement("div");
+    c.id = "toast-container";
+    document.body.appendChild(c);
+  }
+  return c;
+}
+
+function showToast(message) {
+  const c = getToastContainer();
+  const t = document.createElement("div");
+  t.className = "toast";
+  t.textContent = message;
+  c.appendChild(t);
+  setTimeout(() => {
+    t.classList.add("hide");
+    setTimeout(() => t.remove(), 300);
+  }, 3500);
+}
+
+// =====================
 // DOM
 // =====================
 const codeInput    = document.getElementById("code-input");
@@ -80,13 +105,13 @@ function buscarProductoPorCodigo(code) {
   if (!code) return;
 
   if (productosMap.size === 0) {
-    mostrarError("No hay productos cargados. Ve a la pantalla de carga y sube un CSV.");
+    showToast("No hay productos cargados. Ve a Cargar CSV.");
     return;
   }
 
   const prod = productosMap.get(code);
   if (!prod) {
-    mostrarError(`Producto con código ${code} no encontrado en la BD local.`);
+    showToast(`Producto con código ${code} no encontrado.`);
     return;
   }
 
@@ -104,13 +129,8 @@ function buscarProductoPorCodigo(code) {
   mostrarModalProducto(data);
 }
 
-function mostrarError(msg) {
-  // Sin pintar nada en el HTML: error simple.
-  alert(msg);
-}
-
 // =====================
-// MODAL de información de producto (popup dentro de la página)
+// MODAL de información de producto
 // =====================
 function crearModalProductoSiNoExiste() {
   let overlay = document.getElementById("product-modal-overlay");
@@ -130,9 +150,8 @@ function crearModalProductoSiNoExiste() {
         <button class="modal-close" id="modal-close-btn">&times;</button>
       </div>
       <div class="modal-body">
-        <div>
-          <span id="modal-expiry-chip" class="chip chip-ok"></span>
-        </div>
+        <span id="modal-expiry-chip" class="chip chip-ok"></span>
+
         <div class="modal-grid">
           <div>
             <span class="label">Empresa / Entidad</span>
@@ -151,11 +170,11 @@ function crearModalProductoSiNoExiste() {
             <span id="modal-lot" class="value"></span>
           </div>
           <div>
-            <span class="label">Fecha de elaboración</span>
+            <span class="label">Fecha elaboración</span>
             <span id="modal-made" class="value"></span>
           </div>
           <div>
-            <span class="label">Fecha de vencimiento</span>
+            <span class="label">Fecha vencimiento</span>
             <span id="modal-expiry" class="value"></span>
           </div>
           <div>
@@ -163,11 +182,11 @@ function crearModalProductoSiNoExiste() {
             <span id="modal-days" class="value"></span>
           </div>
         </div>
+
         <div class="modal-extra">
           <p id="modal-status-text" class="status-text"></p>
           <p class="hint-text">
-            Sugerencia: verifica físicamente el producto en bodega antes de dispensarlo o usarlo,
-            según los protocolos de la institución.
+            Verifica físicamente el producto en bodega antes de usarlo, según los protocolos de la institución.
           </p>
         </div>
       </div>
@@ -214,30 +233,28 @@ function mostrarModalProducto(data) {
   const lvl = data.alert_level;
   chipEl.className = "chip";
   let textoChip = "En buen estado";
-  let textoStatus =
-    "El producto se encuentra dentro de su vida útil según la fecha de vencimiento registrada.";
+  let textoStatus = "";
 
   if (lvl === "vencido") {
     chipEl.classList.add("chip-danger");
-    textoChip = "VENCIDO";
-    textoStatus =
-      "Este producto está vencido. Debe retirarse del stock y gestionarse según protocolo institucional.";
+    textoChip   = "Producto vencido";
+    textoStatus = "Este producto está vencido. Debe retirarse del stock.";
   } else if (lvl === "1-dia") {
     chipEl.classList.add("chip-warn");
-    textoChip = "Vence en 1 día";
-    textoStatus =
-      "Queda 1 día para el vencimiento. Verifica si se puede priorizar su uso o separar del stock.";
+    textoChip   = "Vence en 1 día";
+    textoStatus = "Queda 1 día para el vencimiento. Manténlo en observación.";
   } else if (lvl === "2-dias") {
     chipEl.classList.add("chip-warn");
-    textoChip = "Vence en 2 días";
+    textoChip   = "Vence en 2 días";
     textoStatus = "Quedan 2 días para el vencimiento. Mantén este producto bajo seguimiento.";
   } else if (lvl === "3-dias") {
     chipEl.classList.add("chip-warn");
-    textoChip = "Vence en 3 días";
-    textoStatus =
-      "Quedan 3 días para el vencimiento. Puedes organizarlo para rotación o priorización de uso.";
+    textoChip   = "Vence en 3 días";
+    textoStatus = "Quedan 3 días para el vencimiento. Prioriza su rotación.";
   } else {
     chipEl.classList.add("chip-ok");
+    textoChip   = "En buen estado";
+    textoStatus = "El producto se encuentra dentro de su vida útil.";
   }
 
   chipEl.textContent = textoChip;
@@ -247,7 +264,7 @@ function mostrarModalProducto(data) {
 }
 
 // =====================
-// Notificaciones del sistema (fuera del HTML visual)
+// Notificaciones del sistema
 // =====================
 async function solicitarPermisoNotificaciones() {
   if (!("Notification" in window)) return;
@@ -281,17 +298,18 @@ function mostrarNotificacionProducto(data) {
     `Días para vencer: ${Number.isNaN(data.days_to_expiry) ? "-" : data.days_to_expiry}`;
 
   if (!("Notification" in window) || Notification.permission !== "granted") {
-    // Fallback simple
-    alert(body);
+    // SIN alert(); si no hay permiso, solo registro en consola + toast suave
+    console.log("[Alerta producto]", body);
+    showToast(`${data.name}: ${estado}`);
     return;
   }
 
   let titulo =
     lvl === "vencido"
-      ? "Producto VENCIDO"
+      ? "Producto vencido"
       : lvl === "ok"
       ? "Producto consultado"
-      : "Producto próximo a vencerse";
+      : "Producto próximo a vencer";
 
   const notif = new Notification(titulo, {
     body,
@@ -322,9 +340,9 @@ codeInput.addEventListener("keydown", (e) => {
 // =====================
 // Cámara con ZXing (barras + QR)
 // =====================
-let codeReader     = null;
+let codeReader      = null;
 let currentDeviceId = null;
-let cameraOn       = false;
+let cameraOn        = false;
 
 async function listarCamaras() {
   try {
@@ -347,6 +365,7 @@ async function listarCamaras() {
     }
   } catch (err) {
     console.error("Error listando cámaras:", err);
+    showToast("No fue posible listar las cámaras.");
   }
 }
 
@@ -355,7 +374,10 @@ selectCam.addEventListener("change", (e) => {
 });
 
 async function iniciarCamara() {
-  if (!currentDeviceId) return;
+  if (!currentDeviceId) {
+    showToast("No hay cámara seleccionada.");
+    return;
+  }
   if (!codeReader) {
     codeReader = new ZXingBrowser.BrowserMultiFormatReader();
   }
@@ -374,15 +396,13 @@ async function iniciarCamara() {
           console.log("Código leído por cámara:", text);
           codeInput.value = text;
           codeInput.focus();
-          buscarProductoPorCodigo(text); // dispara automáticamente
+          buscarProductoPorCodigo(text);
         }
       }
     );
   } catch (err) {
     console.error("Error usando cámara:", err);
-    mostrarError(
-      "No fue posible acceder a la cámara. Prueba con otro navegador o sirviendo el sitio por HTTPS."
-    );
+    showToast("No fue posible acceder a la cámara.");
     detenerCamara();
   }
 }
@@ -432,8 +452,7 @@ function mostrarAlertasPeriodicas() {
     if (ahora - last < NOTIFY_INTERVAL_MS) return; // ya se notificó hace poco
 
     lastNotified.set(p.code, ahora);
-    // Notificación por artículo
-    mostrarNotificacionProducto(p);
+    mostrarNotificacionProducto(p); // una notificación por artículo
   });
 }
 

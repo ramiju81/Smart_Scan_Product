@@ -467,6 +467,40 @@ body.body-bg {
   color: #9ca3af;
 }
 
+
+
+/* ===== Toasts (mensajes discretos) ===== */
+
+#toast-container {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 9999;
+}
+
+.toast {
+  min-width: 220px;
+  max-width: 320px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.96);
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  color: #e5e7eb;
+  font-size: 12px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.7);
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.toast.hide {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
 /* ======================================
    UTILIDADES
    ====================================== */

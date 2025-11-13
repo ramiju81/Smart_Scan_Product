@@ -1,41 +1,33 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Control de Vencimientos – Scanner Inteligente</title>
+  <title>Control de Vencimientos – Scanner</title>
   <link rel="stylesheet" href="static/css/styles.css" />
-  <!-- ZXing para cámara (códigos de barras + QR) -->
   <script src="https://unpkg.com/@zxing/browser@latest"></script>
 </head>
 <body class="body-bg">
   <div class="page-shell">
-    <!-- ENCABEZADO -->
     <header class="top-bar">
       <div class="brand-block">
         <div class="brand-mark">CV</div>
         <div class="brand-text">
           <h1>Control de Vencimientos</h1>
-          <p>Sistema inteligente de lectura por código de barras y QR.</p>
+          <p>Lectura inteligente por código de barras y QR.</p>
         </div>
       </div>
       <nav class="top-actions">
-        <a href="carga.html" class="pill-link">Cargar productos (CSV)</a>
+        <a href="carga.html" class="pill-link">Cargar CSV</a>
       </nav>
     </header>
 
-    <!-- CONTENIDO PRINCIPAL -->
     <main class="main-layout">
-      <!-- Columna izquierda: Scanner -->
+      <!-- Panel de scanner -->
       <section class="scanner-panel">
         <h2 class="section-title">
-          <span class="step">1</span>
-          Escanear / ingresar código
+          <span class="step">1</span> Escanear / ingresar código
         </h2>
-        <p class="section-sub">
-          Usa la cámara, una pistola lectora o digita el código manualmente.
-        </p>
 
         <div class="scan-card">
           <div class="scan-input-row">
@@ -55,9 +47,9 @@
               </button>
               <select id="camera-select" class="camera-select"></select>
             </div>
-            <p class="hint">
-              Compatible con códigos de barras, QR y lectores tipo pistola.
-            </p>
+            <span class="hint">
+              Códigos de barras · QR · Pistola lectora
+            </span>
           </div>
 
           <div class="video-wrapper" id="video-wrapper" hidden>
@@ -66,35 +58,30 @@
         </div>
       </section>
 
-      <!-- Columna derecha: Explicación / valor agregado -->
+      <!-- Panel visual / resumen -->
       <aside class="info-panel">
         <div class="info-card">
-          <h3>¿Qué hace este sistema?</h3>
+          <h3>Lectura en tiempo real</h3>
           <ul>
-            <li>Lee códigos de barras y QR desde cámara o lector.</li>
-            <li>Consulta una base de datos local con productos y fechas.</li>
-            <li>Muestra una ficha emergente con toda la información del producto.</li>
-            <li>Envía notificaciones periódicas de productos vencidos o por vencer.</li>
+            <li>Escaneo desde cámara o lector.</li>
+            <li>Identificación inmediata del producto.</li>
+            <li>Popup con ficha detallada.</li>
           </ul>
         </div>
 
         <div class="info-card secondary">
-          <h3>Alertas automáticas</h3>
-          <p>
-            Cada <strong>10 minutos</strong> se revisan los productos cargados y, si hay
-            vencidos o próximos a vencerse (3, 2 o 1 día), el sistema envía
-            <strong>notificaciones emergentes</strong> por cada producto.
-          </p>
-          <p class="note">
-            Mantén esta página abierta (puede estar minimizada).  
-            No es necesario hacer clic en ningún botón para que las alertas funcionen.
-          </p>
+          <h3>Alertas inteligentes</h3>
+          <ul>
+            <li>Revisión automática cada 10 minutos.</li>
+            <li>Notificaciones por producto vencido o por vencer.</li>
+            <li>Funciona con la página en segundo plano.</li>
+          </ul>
         </div>
       </aside>
     </main>
 
     <footer class="page-footer">
-      <span>Sistema desarrollado como prototipo de control de vencimientos.</span>
+      <span>Prototipo de sistema para control de vencimientos.</span>
     </footer>
   </div>
 
