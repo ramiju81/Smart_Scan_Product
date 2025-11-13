@@ -1,6 +1,6 @@
 // static/js/scanner.js
 // Scanner + cámara + notificaciones + popup de producto
-// Sin "Esta página dice", sin info incrustada en HTML.
+// SIN alert(), SIN selector de cámara.
 
 const STORAGE_KEY = "productos_vencimientos";
 
@@ -64,7 +64,7 @@ function cargarBD() {
 cargarBD();
 
 // =====================
-// Toasts (mensajes discretos)
+// Toasts discretos
 // =====================
 function getToastContainer() {
   let c = document.getElementById("toast-container");
@@ -94,7 +94,6 @@ function showToast(message) {
 const codeInput    = document.getElementById("code-input");
 const btnSearch    = document.getElementById("btn-search");
 const btnToggleCam = document.getElementById("btn-toggle-camera");
-const selectCam    = document.getElementById("camera-select");
 const videoWrapper = document.getElementById("video-wrapper");
 const videoElem    = document.getElementById("preview");
 
@@ -105,7 +104,7 @@ function buscarProductoPorCodigo(code) {
   if (!code) return;
 
   if (productosMap.size === 0) {
-    showToast("No hay productos cargados. Ve a Cargar CSV.");
+    showToast("No hay productos cargados. Carga el CSV primero.");
     return;
   }
 
@@ -124,7 +123,7 @@ function buscarProductoPorCodigo(code) {
     alert_level: lvl,
   };
 
-  // Notificación del sistema + popup modal dentro de la página
+  // Notificación + modal
   mostrarNotificacionProducto(data);
   mostrarModalProducto(data);
 }
@@ -242,19 +241,19 @@ function mostrarModalProducto(data) {
   } else if (lvl === "1-dia") {
     chipEl.classList.add("chip-warn");
     textoChip   = "Vence en 1 día";
-    textoStatus = "Queda 1 día para el vencimiento. Manténlo en observación.";
+    textoStatus = "Queda 1 día para el vencimiento.";
   } else if (lvl === "2-dias") {
     chipEl.classList.add("chip-warn");
     textoChip   = "Vence en 2 días";
-    textoStatus = "Quedan 2 días para el vencimiento. Mantén este producto bajo seguimiento.";
+    textoStatus = "Quedan 2 días para el vencimiento.";
   } else if (lvl === "3-dias") {
     chipEl.classList.add("chip-warn");
     textoChip   = "Vence en 3 días";
-    textoStatus = "Quedan 3 días para el vencimiento. Prioriza su rotación.";
+    textoStatus = "Quedan 3 días para el vencimiento.";
   } else {
     chipEl.classList.add("chip-ok");
     textoChip   = "En buen estado";
-    textoStatus = "El producto se encuentra dentro de su vida útil.";
+    textoStatus = "El producto está dentro de su vida útil.";
   }
 
   chipEl.textContent = textoChip;
@@ -298,7 +297,6 @@ function mostrarNotificacionProducto(data) {
     `Días para vencer: ${Number.isNaN(data.days_to_expiry) ? "-" : data.days_to_expiry}`;
 
   if (!("Notification" in window) || Notification.permission !== "granted") {
-    // SIN alert(); si no hay permiso, solo registro en consola + toast suave
     console.log("[Alerta producto]", body);
     showToast(`${data.name}: ${estado}`);
     return;
@@ -338,46 +336,12 @@ codeInput.addEventListener("keydown", (e) => {
 });
 
 // =====================
-// Cámara con ZXing (barras + QR)
+// Cámara con ZXing (sin selector, usa la cámara por defecto)
 // =====================
-let codeReader      = null;
-let currentDeviceId = null;
-let cameraOn        = false;
-
-async function listarCamaras() {
-  try {
-    const devices = await ZXingBrowser.BrowserMultiFormatReader.listVideoInputDevices();
-    selectCam.innerHTML = "";
-    devices.forEach((d, idx) => {
-      const opt = document.createElement("option");
-      opt.value = d.deviceId;
-      opt.textContent = d.label || `Cámara ${idx + 1}`;
-      selectCam.appendChild(opt);
-    });
-    if (devices.length > 0) {
-      currentDeviceId = devices[0].deviceId;
-    } else {
-      const opt = document.createElement("option");
-      opt.value = "";
-      opt.textContent = "No hay cámaras detectadas";
-      selectCam.appendChild(opt);
-      btnToggleCam.disabled = true;
-    }
-  } catch (err) {
-    console.error("Error listando cámaras:", err);
-    showToast("No fue posible listar las cámaras.");
-  }
-}
-
-selectCam.addEventListener("change", (e) => {
-  currentDeviceId = e.target.value;
-});
+let codeReader = null;
+let cameraOn   = false;
 
 async function iniciarCamara() {
-  if (!currentDeviceId) {
-    showToast("No hay cámara seleccionada.");
-    return;
-  }
   if (!codeReader) {
     codeReader = new ZXingBrowser.BrowserMultiFormatReader();
   }
@@ -388,7 +352,7 @@ async function iniciarCamara() {
 
   try {
     await codeReader.decodeFromVideoDevice(
-      currentDeviceId,
+      undefined,      // cámara por defecto (cel o PC)
       videoElem,
       (result, err) => {
         if (result) {
@@ -449,18 +413,14 @@ function mostrarAlertasPeriodicas() {
 
   lista.forEach((p) => {
     const last = lastNotified.get(p.code) || 0;
-    if (ahora - last < NOTIFY_INTERVAL_MS) return; // ya se notificó hace poco
-
+    if (ahora - last < NOTIFY_INTERVAL_MS) return;
     lastNotified.set(p.code, ahora);
-    mostrarNotificacionProducto(p); // una notificación por artículo
+    mostrarNotificacionProducto(p);
   });
 }
 
 // =====================
 // Inicialización
 // =====================
-listarCamaras();
 solicitarPermisoNotificaciones();
-
-// Intervalo automático (cada 10 min)
 setInterval(mostrarAlertasPeriodicas, NOTIFY_INTERVAL_MS);
